@@ -1,0 +1,44 @@
+name: Auto Merge Study Plan
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Auto Merge Study Plan
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const labels = context.payload.pull_request.labels
+            const branchName = context.payload.pull_request.head.ref
+            //if branchName is 'main' add warning comment to PR
+            if (branchName === 'main') {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'main 브랜치에 PR을 보내셨습니다. 다시 한번 확인해주세요! 🙏'
+              })
+            } //if branchName is not 'main' and has only 'study-plan' label, 
+            else {
+              github.pulls.merge({
+                pull_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+
+              //add comment to PR
+              //get all label names with comma
+              const labelNames = labels.map(label => label.name).join(', ')
+              const numLabel = labels.length;
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `${branchName} [${labelNames} (${numLabel})] PR이 자동으로 머지되었습니다. 수고하셨습니다! 찡긋 😉`
+              })
+            }
