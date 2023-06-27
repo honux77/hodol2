@@ -1,4 +1,4 @@
-name: Auto Merge Study Plan
+name: Auto Merge
 on:
   pull_request:
     types: [opened, reopened]
@@ -15,16 +15,16 @@ jobs:
           script: |
             const labels = context.payload.pull_request.labels
             const branchName = context.payload.pull_request.head.ref
+            const targetBranchName = context.payload.pull_request.base.ref
             //if branchName is 'main' add warning comment to PR
-            if (branchName === 'main') {
+            if (targetBranchName === 'main') {
               github.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: 'main 브랜치에 PR을 보내셨습니다. 다시 한번 확인해주세요! 🙏'
               })
-            } //if branchName is not 'main' and has only 'study-plan' label, 
-            else {
+            } else {
               github.pulls.merge({
                 pull_number: context.issue.number,
                 owner: context.repo.owner,
