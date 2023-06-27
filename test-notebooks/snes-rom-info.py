@@ -24,7 +24,11 @@ $FFD8  | 1      | Ram size 1 << N KB
 with open(filename, "rb") as f:
     f.seek(0xFFC0)
     title = f.read(21)
-    print(title.decode("utf-8"))
+    try:
+        print(title.decode("utf-8"))
+    except UnicodeDecodeError:
+        print("Title is not valid utf-8")
+        print(title)
     f.seek(0xFFD5)
     speed = f.read(1)
     #print speed bit
